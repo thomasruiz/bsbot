@@ -1,0 +1,16 @@
+{
+  "name": "bsbot",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Thomas Ruiz <contact@thomasruiz.eu>",
+  "description": "Helper bot for #betaseries on GeekNode",
+  "dependencies": {
+    "hubot": "^2.11.1",
+    "hubot-diagnostics": "0.0.1",
+    "hubot-irc": "^0.2.7",
+    "hubot-scripts": "^2.5.16"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+}
