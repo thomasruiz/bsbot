@@ -1,4 +1,4 @@
-defaultCommands = ['.show']
+defaultCommands = ['.show', '.serie', '.film', '.movie']
 
 whitelist   = require '../support/whitelist'
 TriggerRepo = require '../support/trigger_repository'
