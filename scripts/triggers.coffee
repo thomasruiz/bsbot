@@ -28,8 +28,9 @@ module.exports = (robot) ->
   robot.hear /^(([^:\s!]+)[:\s]+)?(\.\w+)(.*)/i, (msg) ->
     user    = msg.match[2]
     name    = msg.match[3]
-    args    = msg.match[4]
     phrase  = triggerRepo.find(name)?.phrase
+
+    return if name in ['.show']
 
     if phrase?
       if user?
