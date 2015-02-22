@@ -7,7 +7,7 @@ module.exports = (robot) ->
     betaSeries.authorize (key) ->
       url = "https://www.betaseries.com/oauth?key=#{key}"
       msg.sendPrivate "Va sur l'url suivante et suis les indications: #{url}"
-      msg.reply "Va voir tes PVs ;)"
+    msg.reply "Va voir tes PVs ;)"
 
   robot.respond /token ([0-9a-z]+)/, (msg) ->
     betaSeries.saveToken msg.message.user.name, msg.match[1], ->
