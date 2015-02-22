@@ -7,6 +7,8 @@ module.exports = (robot) ->
     title = msg.match[1]
     betaSeries.search_show title, (show) ->
       if show?
-        msg.reply "#{show.title} - #{show.resource_url}"
+        last_season = show.seasons_details[show.seasons - 1]
+        last_ep = "#{last_season.number}x#{last_season.episodes}"
+        msg.reply "#{show.title} - Status: #{show.status} (dernier ep: #{last_ep}) - #{show.resource_url}"
       else
         msg.reply "Je ne trouve aucune série correspondant à #{title}."
