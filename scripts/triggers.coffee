@@ -11,21 +11,21 @@ module.exports = (robot) ->
 
     msg.reply message + formatter(triggers)
 
-  robot.respond /learn command (\![a-zA-Z-_\&\^\!\#]+) (.*)/, (msg) ->
+  robot.respond /learn command (\.[a-zA-Z-_\&\^\!\#]+) (.*)/, (msg) ->
     return unless whitelist.canAddTriggers(robot, msg.message.user)
     [name, phrase] = msg.match[1..2]
 
     triggerRepo.save(name, phrase, msg.message.user.username)
     msg.reply "Commande #{name} apprise."
 
-  robot.respond /forget command (\![a-zA-Z-_\&\^\!\#]+)/, (msg) ->
+  robot.respond /forget command (\.[a-zA-Z-_\&\^\!\#]+)/, (msg) ->
     return unless whitelist.canAddTriggers(robot, msg.message.user)
     name = msg.match[1]
 
     triggerRepo.remove name
     msg.reply "Commande #{name} oubliée!"
 
-  robot.hear /^(([^:\s!]+)[:\s]+)?(!\w+)(.*)/i, (msg) ->
+  robot.hear /^(([^:\s!]+)[:\s]+)?(\.\w+)(.*)/i, (msg) ->
     user    = msg.match[2]
     name    = msg.match[3]
     args    = msg.match[4]
