@@ -1,3 +1,5 @@
+defaultCommands = ['.show']
+
 whitelist   = require '../support/whitelist'
 TriggerRepo = require '../support/trigger_repository'
 
@@ -6,6 +8,7 @@ module.exports = (robot) ->
 
   robot.respond /list commands/, (msg) ->
     triggers = triggerRepo.all()
+    triggers.push { name: trigger } for trigger in defaultCommands
     formatter = (list) -> list.map((t) -> t.name).join(', ') || 'Aucune'
     message = "Commandes disponibles : "
 
@@ -28,9 +31,10 @@ module.exports = (robot) ->
   robot.hear /^(([^:\s!]+)[:\s]+)?(\.\w+)(.*)/i, (msg) ->
     user    = msg.match[2]
     name    = msg.match[3]
-    phrase  = triggerRepo.find(name)?.phrase
 
-    return if name in ['.show']
+    return if name in defaultCommands
+
+    phrase  = triggerRepo.find(name)?.phrase
 
     if phrase?
       if user?
