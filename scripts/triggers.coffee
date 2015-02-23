@@ -28,9 +28,9 @@ module.exports = (robot) ->
     triggerRepo.remove name
     msg.reply "Commande #{name} oubliée!"
 
-  robot.hear /^(([^:\s!]+)[:\s]+)?(\.\w+)(.*)/i, (msg) ->
+  robot.hear /^(\.\w+)\s?([^:\s!]+)?(.*)/i, (msg) ->
     user    = msg.match[2]
-    name    = msg.match[3]
+    name    = msg.match[1]
 
     return if name in defaultCommands
 
