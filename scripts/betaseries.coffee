@@ -13,6 +13,16 @@ module.exports = (robot) ->
     betaSeries.saveToken msg.message.user.name, msg.match[1], ->
       msg.reply "Ton token a bien été enregistré! :)"
 
+  robot.respond /trouve (moi )?une série comme (.+)/, (msg) ->
+    title = msg.match[2]
+    betaSeries.searchShow title, (show) ->
+      if show?
+        betaSeries.similarShows show.id, (shows) ->
+          formatter = (show) -> show.map((s) -> s.show_title).join(', ') || 'Aucune'
+          msg.reply "Séries comme #{title}: #{formatter(shows)}"
+      else
+        msg.reply "Je ne trouve aucune série correspondant à #{title}."
+
   robot.hear /\.(show|serie) (.+)/, (msg) ->
     title = msg.match[2]
     betaSeries.searchShow title, (show) ->

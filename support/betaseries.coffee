@@ -19,6 +19,10 @@ class BetaSeries
     @get "movies/search?title=#{title}&nbpp=1", (body) ->
       callback body.movies[0]
 
+  similarShows: (id, callback) ->
+    @get "shows/similars?id=#{id}", (body) ->
+      callback body.similars
+
   get: (url, callback) ->
     @client(@buildUrl url).get() @handleResponse(callback)
 
@@ -28,9 +32,7 @@ class BetaSeries
   buildUrl: (url) ->
     sign = if (url.indexOf('?') == -1) then '?' else '&'
     key = "#{sign}key=#{@key}"
-    a = @baseUrl + url + key
-    console.log a
-    a
+    @baseUrl + url + key
 
   handleResponse: (callback) ->
     (err, response, body) ->
