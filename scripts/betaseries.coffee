@@ -31,7 +31,7 @@ module.exports = (robot) ->
       else
         betaSeries.lastEpisode user, show.id, (episode) ->
           if user?
-            episodeStatus = if episode.user.seen then " vu" else " en retard"
+            episodeStatus = if episode.user.seen then " à jour" else " en retard"
           else
             episodeStatus = ""
           status = "#{show.status} (#{episode.code}#{episodeStatus})"
