@@ -1,35 +1,44 @@
 BetaSeries = require '../support/betaseries.coffee'
 
 module.exports = (robot) ->
+  getUser = (msg) -> robot.brain.get msg.message.user.name
   betaSeries = new BetaSeries(robot.http, robot.brain)
 
   robot.respond /authorize me/, (msg) ->
-    betaSeries.authorize msg.message.user.name, (key) ->
+    betaSeries.authorize (key) ->
       url = "https://www.betaseries.com/oauth?key=#{key}"
       msg.sendPrivate "Va sur l'url suivante et suis les indications: #{url}"
-    msg.reply "Va voir tes PVs ;)"
 
   robot.respond /token ([0-9a-z]+)/, (msg) ->
-    betaSeries.saveToken msg.message.user.name, msg.match[1]
-    msg.reply "Ton token a bien été enregistré! :)"
+    user = msg.message.user.name
+    robot.brain.set user, msg.match[1]
+    msg.reply "Token enregistré"
 
   robot.respond /trouve (moi )?une série comme (.+)/, (msg) ->
-    title = msg.match[2]
-    betaSeries.searchShow msg.message.user.name, title, (show) ->
-      betaSeries.similarShows msg.message.user.name, show.id, (shows) ->
-        formatter = (show) -> show.map((s) -> s.show_title).join(', ') || 'Aucune'
-        msg.reply "Séries comme #{title}: #{formatter(shows)}"
+    user = getUser msg
+    betaSeries.searchShow user, msg.match[2], (show) ->
+      betaSeries.similarShows user, show.id, (shows) ->
+        similarShows = if shows? then (shows.map (show) -> show.title) else "Aucun"
+        msg.reply "Séries comme #{msg.match[2]}: #{similarShows}"
 
   robot.hear /\.(show|serie) (.+)/, (msg) ->
-    title = msg.match[2]
-    betaSeries.searchShow msg.message.user.name, title, (show) ->
-      console.log show
-      last_season = show.seasons_details[show.seasons - 1]
-      last_ep = "#{last_season.number}x#{last_season.episodes}"
-      msg.reply "#{show.title} - Status: #{show.status} (dernier ep: #{last_ep}) - #{show.resource_url}"
+    user = getUser msg
+    betaSeries.searchShow user, msg.match[2], (show) ->
+      if show.episodes == 0
+        betaSeries.nextEpisode user, show.id, (episode) ->
+          status = "#{show.status} (débute le #{episode.date})"
+          msg.reply "#{show.title} - Status: #{status} - #{show.resource_url}"
+      else
+        betaSeries.lastEpisode user, show.id, (episode) ->
+          if user?
+            episodeStatus = if episode.user.seen then " vu" else " en retard"
+          else
+            episodeStatus = ""
+          status = "#{show.status} (#{episode.code}#{episodeStatus})"
+          msg.reply "#{show.title} - Status: #{status} - #{show.resource_url}"
 
   robot.hear /\.(film|movie) (.+)/, (msg) ->
-    title = msg.match[2]
-    betaSeries.searchMovie msg.message.user.name, title, (film) ->
+    user = getUser msg
+    betaSeries.searchMovie user, msg.match[2], (film) ->
       film.url = "https://www.betaseries.com/film/#{film.id}-#{film.url}"
       msg.reply "#{film.title} (#{film.production_year}) by #{film.director} - #{film.url}"

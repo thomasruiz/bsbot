@@ -1,40 +1,42 @@
 class BetaSeries
-  constructor: (@client, @brain) ->
+  constructor: (@client) ->
     @baseUrl = "https://api.betaseries.com/"
     @key = process.env.HUBOT_BETASERIES_KEY
 
-  authorize: (user, callback) ->
-    @post "members/oauth", user, (body) ->
+  authorize: (callback) ->
+    @post "members/oauth", null, (body) ->
       callback body.oauth.key
 
-  saveToken: (user, token) ->
-    @brain.set user, token
-
-  searchShow: (user, title, callback) ->
-    @get "shows/search?title=#{title}&nbpp=1", user, (body) ->
+  searchShow: (token, title, callback) ->
+    @get "shows/search?title=#{title}&nbpp=1", token, (body) ->
       callback body.shows[0] if body.shows[0]?
 
-  searchMovie: (user, title, callback) ->
-    @get "movies/search?title=#{title}&nbpp=1", user, (body) ->
+  searchMovie: (token, title, callback) ->
+    @get "movies/search?title=#{title}&nbpp=1", token, (body) ->
       callback body.movies[0] if body.movies[0]?
 
-  similarShows: (user, id, callback) ->
-    @get "shows/similars?id=#{id}", user, (body) ->
+  similarShows: (token, id, callback) ->
+    @get "shows/similars?id=#{id}", token, (body) ->
       callback body.similars if body.similars[0]?
 
-  markAsSeen: (user, id, callback) ->
-    callback false unless @brain.user?
+  nextEpisode: (token, id, callback) ->
+    @get "episodes/next?id=#{id}", token, (body) ->
+      callback body.episode
 
-  get: (url, user, callback) ->
-    @client(@buildUrl(url, user)).get() @handleResponse(callback)
+  lastEpisode: (token, id, callback) ->
+    @get "episodes/latest?id=#{id}", token, (body) ->
+      callback body.episode
 
-  post: (url, user, callback) ->
-    @client(@buildUrl(url, user)).post() @handleResponse(callback)
+  get: (url, token, callback) ->
+    @client(@buildUrl(url, token)).get() @handleResponse(callback)
 
-  buildUrl: (url, user) ->
+  post: (url, token, callback) ->
+    @client(@buildUrl(url, token)).post() @handleResponse(callback)
+
+  buildUrl: (url, token) ->
     sign = if (url.indexOf('?') == -1) then '?' else '&'
     key = "#{sign}key=#{@key}"
-    @baseUrl + url + key + "&token=#{@brain.get user}"
+    @baseUrl + url + key + "&token=#{token}"
 
   handleResponse: (callback) ->
     (err, response, body) ->
@@ -44,3 +46,4 @@ class BetaSeries
 
 
 module.exports = BetaSeries
+
