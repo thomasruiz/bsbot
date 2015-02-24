@@ -3,36 +3,38 @@ class BetaSeries
     @baseUrl = "https://api.betaseries.com/"
     @key = process.env.HUBOT_BETASERIES_KEY
 
-  authorize: (callback) ->
-    @post "members/oauth", (body) ->
+  authorize: (user, callback) ->
+    @post "members/oauth", user, (body) ->
       callback body.oauth.key
 
-  saveToken: (user, token, callback) ->
+  saveToken: (user, token) ->
     @brain.set user, token
-    callback()
 
-  searchShow: (title, callback) ->
-    @get "shows/search?title=#{title}&nbpp=1", (body) ->
-      callback body.shows[0]
+  searchShow: (user, title, callback) ->
+    @get "shows/search?title=#{title}&nbpp=1", user, (body) ->
+      callback body.shows[0] if body.shows[0]?
 
-  searchMovie: (title, callback) ->
-    @get "movies/search?title=#{title}&nbpp=1", (body) ->
-      callback body.movies[0]
+  searchMovie: (user, title, callback) ->
+    @get "movies/search?title=#{title}&nbpp=1", user, (body) ->
+      callback body.movies[0] if body.movies[0]?
 
-  similarShows: (id, callback) ->
-    @get "shows/similars?id=#{id}", (body) ->
-      callback body.similars
+  similarShows: (user, id, callback) ->
+    @get "shows/similars?id=#{id}", user, (body) ->
+      callback body.similars if body.similars[0]?
 
-  get: (url, callback) ->
-    @client(@buildUrl url).get() @handleResponse(callback)
+  markAsSeen: (user, id, callback) ->
+    callback false unless @brain.user?
 
-  post: (url, callback) ->
-    @client(@buildUrl url).post() @handleResponse(callback)
+  get: (url, user, callback) ->
+    @client(@buildUrl(url, user)).get() @handleResponse(callback)
 
-  buildUrl: (url) ->
+  post: (url, user, callback) ->
+    @client(@buildUrl(url, user)).post() @handleResponse(callback)
+
+  buildUrl: (url, user) ->
     sign = if (url.indexOf('?') == -1) then '?' else '&'
     key = "#{sign}key=#{@key}"
-    @baseUrl + url + key
+    @baseUrl + url + key + "&token=#{@brain.get user}"
 
   handleResponse: (callback) ->
     (err, response, body) ->
